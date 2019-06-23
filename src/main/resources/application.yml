@@ -1,0 +1,3 @@
+jwt:
+  secret: /B?E(G+KbPeShVmYq3t6w9z$C&F)J@McQfTjWnZr4u7x!A%D*G-KaPdRgUkXp2s5
+  tokenValidity: 3153600000000 # 100 years, usually not advisable for production
