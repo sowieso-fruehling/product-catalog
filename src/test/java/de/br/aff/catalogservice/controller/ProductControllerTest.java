@@ -25,7 +25,7 @@ public class ProductControllerTest {
     public void thatEndpointIsUnavailableWithoutJwtToken() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/products")
+                .get("/catalog-api/v1/products")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
@@ -36,7 +36,7 @@ public class ProductControllerTest {
         String invalidToken="Bearer 111111111111111.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6MTU2MjE3NDcxMCwiaWF0IjoxNTYxMzEwNzEwfQ.0ictAa4m41JBdUQ3bx0divbv_UzfRzjjopbfY9fFhgcBX2gUmbSZwlWMjRBhP030mUm7FmbmP5PNPD-1nBUm8Q";
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/products")
+                .get("/catalog-api/v1/products")
                 .header(HttpHeaders.AUTHORIZATION,invalidToken)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
@@ -48,7 +48,7 @@ public class ProductControllerTest {
         String invalidToken="Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6MTU2MTMxNzgyMywiaWF0IjoxNTYxMzE3NzYzfQ.5YcklS-z9rPWA0Lsf6VX8D6TazeZvVCp249QLKwuEU0iqq_j78GnV3MQ0z18fGztXnQ5Fi2EKUXD-37MJIcc5w";
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/products")
+                .get("/catalog-api/v1/products")
                 .header(HttpHeaders.AUTHORIZATION,invalidToken)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
@@ -61,7 +61,7 @@ public class ProductControllerTest {
         String validToken="Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6NDcxNDkxNzY1OSwiaWF0IjoxNTYxMzE3NjU5fQ.ww525pk_LeH0wsp86oY7VH7LZlWuh4s0BKSdodl_DbsN3s-Wp0-dA4aK9uQhmMV4QHof9BYQd6nNAUfTvVUyqg";
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/products")
+                .get("/catalog-api/v1/products")
                 .header(HttpHeaders.AUTHORIZATION,validToken)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());

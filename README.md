@@ -1,6 +1,9 @@
-# Catalog service
+# Product catalog
 
-This is an example app of how to protect an application with JWT token using spring security
+Provides REST CRUD api to authenticated user. 
+
+Currently only one user can be authenticated and he's credentials are username/password
+
  
 ### How to run the tests locally
 
