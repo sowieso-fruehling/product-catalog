@@ -1,6 +1,6 @@
 package de.br.aff.catalogservice.controller;
 
-import static de.br.aff.catalogservice.utils.Constants.DEFAULT_PRODUCTS_QUANTITY;
+import static de.br.aff.catalogservice.utils.Constants.DEFAULT_PAGINATION_SIZE;
 import static de.br.aff.catalogservice.utils.Constants.DETAULT_PRODUCT_TITLE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,7 +70,7 @@ public class ProductControllerTest {
         .header(HttpHeaders.AUTHORIZATION, validToken)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", Matchers.hasSize(DEFAULT_PRODUCTS_QUANTITY)))
+        .andExpect(jsonPath("$", Matchers.hasSize(DEFAULT_PAGINATION_SIZE)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[*].title",
             Matchers.everyItem(Matchers.startsWith(DETAULT_PRODUCT_TITLE))));
   }
