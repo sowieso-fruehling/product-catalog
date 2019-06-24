@@ -21,39 +21,40 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtUserDetailsService jwtUserDetailsService;
-    private final JwtRequestFilter jwtRequestFilter;
-    private final AuthenticationFailureHandler authenticationFailureHandler;
-    private final RestAccesDeniedHandler restAccesDeniedHandler;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-    }
+  private final JwtUserDetailsService jwtUserDetailsService;
+  private final JwtRequestFilter jwtRequestFilter;
+  private final AuthenticationFailureHandler authenticationFailureHandler;
+  private final RestAccesDeniedHandler restAccesDeniedHandler;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Autowired
+  public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+  }
 
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
+  @Bean
+  @Override
+  public AuthenticationManager authenticationManagerBean() throws Exception {
+    return super.authenticationManagerBean();
+  }
 
-        httpSecurity.cors().and().csrf().disable()
-                .authorizeRequests().antMatchers("/authenticate").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .accessDeniedHandler(restAccesDeniedHandler)
-                .authenticationEntryPoint(authenticationFailureHandler)
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    }
+  @Override
+  protected void configure(HttpSecurity httpSecurity) throws Exception {
+
+    httpSecurity.cors().and().csrf().disable()
+        .authorizeRequests().antMatchers("/authenticate").permitAll()
+        .anyRequest().authenticated()
+        .and()
+        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+        .exceptionHandling()
+        .accessDeniedHandler(restAccesDeniedHandler)
+        .authenticationEntryPoint(authenticationFailureHandler)
+        .and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+  }
 }

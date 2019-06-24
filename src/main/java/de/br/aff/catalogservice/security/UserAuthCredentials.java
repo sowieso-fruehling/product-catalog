@@ -9,7 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class UserCredentials {
-    private String username;
-    private String password;
+public class UserAuthCredentials {
+
+  private String username;
+  private String password;
 }

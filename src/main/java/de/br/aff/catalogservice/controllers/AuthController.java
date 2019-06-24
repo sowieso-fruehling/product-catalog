@@ -3,7 +3,7 @@ package de.br.aff.catalogservice.controllers;
 import de.br.aff.catalogservice.security.JwtResponse;
 import de.br.aff.catalogservice.security.JwtTokenUtil;
 import de.br.aff.catalogservice.security.JwtUserDetailsService;
-import de.br.aff.catalogservice.security.UserCredentials;
+import de.br.aff.catalogservice.security.UserAuthCredentials;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,23 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenUtil jwtTokenUtil;
-    private final JwtUserDetailsService userDetailsService;
+  private final AuthenticationManager authenticationManager;
+  private final JwtTokenUtil jwtTokenUtil;
+  private final JwtUserDetailsService userDetailsService;
 
-    @PostMapping(value = "/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserCredentials authenticationRequest) {
+  @PostMapping(value = "/authenticate")
+  public ResponseEntity<?> createAuthenticationToken(
+      @RequestBody UserAuthCredentials authenticationRequest) {
 
-        authenticateUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+    authenticateUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+    final UserDetails userDetails = userDetailsService
+        .loadUserByUsername(authenticationRequest.getUsername());
 
-        final String token = jwtTokenUtil.generateToken(userDetails);
+    final String token = jwtTokenUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new JwtResponse(token));
-    }
+    return ResponseEntity.ok(new JwtResponse(token));
+  }
 
-    private void authenticateUser(String username, String password) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-    }
+  private void authenticateUser(String username, String password) {
+    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+  }
 }

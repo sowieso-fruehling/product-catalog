@@ -1,16 +1,18 @@
 package de.br.aff.catalogservice.services;
 
 import de.br.aff.catalogservice.domain.Product;
+import de.br.aff.catalogservice.repository.ProductRepository;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
+@RequiredArgsConstructor
 public class ProductService {
-    public List<Product> getProducts(String username) {
-        return List.of(
-                new Product(1L, "Jacket", username + "'s choice", "A1", 123.34d, "blue"),
-                new Product(2L, "Shirt", username + "'s choice", "A1", 13.34d, "yellow")
-        );
-    }
+
+  private final ProductRepository productRepository;
+
+  public List<Product> getProducts() {
+    return productRepository.findAll();
+  }
 }
