@@ -1,10 +1,13 @@
 # Product catalog
 
-Provides REST CRUD api to authenticated user. 
+Provides REST CRUD api to authenticated user ( user that provides valid JWT). 
 
-Currently only one user can be authenticated and he's credentials are username/password
+Only one user can be authenticated and he's credentials are username/password
 
-In memory H2 database is used as a product repository and it is populated at the application startup. 
+In memory H2 database is used as a product repository and it is populated at the application startup with 100 product records. In case you want your db not to be initialized at startup, go to ProductServiceApplication class and make it not implementing InitializingBean interface and overriding afterPropertiesSet 
+
+/catalog-api/v1/products endpoint has enabled pagination and sorting. It returns by default 20 records per page. Sorting and pagination can be customized by providing request parameters page, size and sort. 
+For example, if get request is /catalog-api/v1/products?page=1&size=5&sort=description,desc it will give us second page of 5 elements, sorted by description in descending order. Sorting can be done by and of product entity properties 
 
 Api is versioned using URI versioning technique
 
