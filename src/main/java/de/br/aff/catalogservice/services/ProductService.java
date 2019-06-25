@@ -14,24 +14,25 @@ public class ProductService {
 
   private final ProductRepository productRepository;
 
-  public List<Product> getProducts(Pageable pageable) {
+  public List<Product> getProducts(String title, String description, Pageable pageable) {
+
+    if (title != null && description != null) {
+      return productRepository.findByTitleAndDescription(title, description, pageable);
+    }
+
+    if (title != null) {
+      return productRepository.findByTitle(title, pageable);
+    }
+
+    if (description != null) {
+      return productRepository.findByDescription(description, pageable);
+    }
+
     Slice<Product> productPage = productRepository.findAll(pageable);
     return productPage.getContent();
   }
 
-  public List<Product> getProductsByTitleAndDescription(String title, String description,
-      Pageable pageable) {
-    return productRepository.findByTitleAndDescription(title, description, pageable);
-
-  }
-
-  public List<Product> getProductsByTitle(String title, Pageable pageable) {
-    return productRepository.findByTitle(title, pageable);
-
-  }
-
-  public List<Product> getProductsByDescription(String description, Pageable pageable) {
-    return productRepository.findByDescription(description, pageable);
-
+  public List<Product> createProducts(List<Product> products) {
+    return productRepository.saveAll(products);
   }
 }

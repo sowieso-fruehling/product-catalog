@@ -1,11 +1,16 @@
 package de.br.aff.catalogservice.controllers;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 import de.br.aff.catalogservice.domain.Product;
 import de.br.aff.catalogservice.services.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,22 +23,14 @@ public class ProductController {
   private final ProductService productService;
 
   @GetMapping("/v1/products")
-  public List<Product> getCatalogItems(@RequestParam(required = false) String title,
+  public List<Product> getProducts(@RequestParam(required = false) String title,
       @RequestParam(required = false) String description, Pageable pageable) {
+    return productService.getProducts(title, description, pageable);
+  }
 
-    if (title != null && description != null) {
-      return productService.getProductsByTitleAndDescription(title, description, pageable);
-    }
-
-    if (title != null) {
-      return productService.getProductsByTitle(title, pageable);
-    }
-
-    if (description != null) {
-      return productService.getProductsByDescription(description, pageable);
-    }
-
-    return productService.getProducts(pageable);
-
+  @PostMapping("/v1/products")
+  public ResponseEntity createProducts(@RequestBody List<Product> products) {
+    List<Product> createdProducts = productService.createProducts(products);
+    return ResponseEntity.status(CREATED).body(createdProducts);
   }
 }
