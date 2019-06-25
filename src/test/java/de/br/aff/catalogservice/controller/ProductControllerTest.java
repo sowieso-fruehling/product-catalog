@@ -2,18 +2,21 @@ package de.br.aff.catalogservice.controller;
 
 import static de.br.aff.catalogservice.testutils.Constants.DEFAULT_PAGINATION_SIZE;
 import static de.br.aff.catalogservice.testutils.Constants.DETAULT_PRODUCT_TITLE;
-import static de.br.aff.catalogservice.testutils.Constants.GET_PRODUCTS_PATH;
 import static de.br.aff.catalogservice.testutils.Constants.INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY;
+import static de.br.aff.catalogservice.testutils.Constants.PRODUCTS_PATH;
 import static de.br.aff.catalogservice.testutils.Constants.STARTING_PRICE_OFFSET;
 import static de.br.aff.catalogservice.testutils.Constants.TOKEN_VALID_UNTIL_2119;
 import static de.br.aff.catalogservice.testutils.TestUtils.getResultActions;
+import static de.br.aff.catalogservice.testutils.TestUtils.toJson;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.br.aff.catalogservice.domain.Product;
 import de.br.aff.catalogservice.repository.ProductRepository;
+import java.util.List;
 import java.util.stream.IntStream;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,11 +36,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class ProductControllerTest {
 
   private static boolean dbInitialized = false;
+
   @Autowired
   private MockMvc mockMvc;
   @Autowired
   private ProductRepository productRepository;
-
 
   @Before
   public void initDb() {
@@ -59,7 +62,7 @@ public class ProductControllerTest {
   public void thatEndpointIsUnavailableWithoutJwtToken() throws Exception {
 
     mockMvc.perform(MockMvcRequestBuilders
-        .get(GET_PRODUCTS_PATH)
+        .get(PRODUCTS_PATH)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
   }
@@ -70,7 +73,7 @@ public class ProductControllerTest {
     String invalidToken = "Bearer 111111111111111.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6MTU2MjE3NDcxMCwiaWF0IjoxNTYxMzEwNzEwfQ.0ictAa4m41JBdUQ3bx0divbv_UzfRzjjopbfY9fFhgcBX2gUmbSZwlWMjRBhP030mUm7FmbmP5PNPD-1nBUm8Q";
 
     mockMvc.perform(MockMvcRequestBuilders
-        .get(GET_PRODUCTS_PATH)
+        .get(PRODUCTS_PATH)
         .header(HttpHeaders.AUTHORIZATION, invalidToken)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
@@ -82,7 +85,7 @@ public class ProductControllerTest {
     String expiredToken = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6MTU2MTMxNzgyMywiaWF0IjoxNTYxMzE3NzYzfQ.5YcklS-z9rPWA0Lsf6VX8D6TazeZvVCp249QLKwuEU0iqq_j78GnV3MQ0z18fGztXnQ5Fi2EKUXD-37MJIcc5w";
 
     mockMvc.perform(MockMvcRequestBuilders
-        .get(GET_PRODUCTS_PATH)
+        .get(PRODUCTS_PATH)
         .header(HttpHeaders.AUTHORIZATION, expiredToken)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
@@ -91,7 +94,7 @@ public class ProductControllerTest {
   @Test
   public void thatDefaultPaginationWorks() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders
-        .get(GET_PRODUCTS_PATH)
+        .get(PRODUCTS_PATH)
         .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID_UNTIL_2119)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -102,7 +105,7 @@ public class ProductControllerTest {
 
   @Test
   public void thatCustomPaginationWorks() throws Exception {
-    getResultActions(mockMvc, GET_PRODUCTS_PATH, "page=1")
+    getResultActions(mockMvc, PRODUCTS_PATH, "page=1")
         .andExpect(jsonPath("$", Matchers.hasSize(20)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[0].brand",
             Matchers.equalTo("Brand " + 20)))
@@ -114,13 +117,13 @@ public class ProductControllerTest {
   public void thatSpecifyingNumberOfElementsPerPageWorks() throws Exception {
     int numberOfRecordsOnPage = 5;
 
-    getResultActions(mockMvc, GET_PRODUCTS_PATH, "size=" + numberOfRecordsOnPage)
+    getResultActions(mockMvc, PRODUCTS_PATH, "size=" + numberOfRecordsOnPage)
         .andExpect(jsonPath("$", Matchers.hasSize(numberOfRecordsOnPage)));
   }
 
   @Test
   public void thatDescSortingByPriceWorks() throws Exception {
-    getResultActions(mockMvc, GET_PRODUCTS_PATH, "sort=price,desc")
+    getResultActions(mockMvc, PRODUCTS_PATH, "sort=price,desc")
         .andExpect(jsonPath("$", Matchers.hasSize(20)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[0].price",
             Matchers
@@ -132,7 +135,7 @@ public class ProductControllerTest {
 
   @Test
   public void thatDescSortingByColorWorks() throws Exception {
-    getResultActions(mockMvc, GET_PRODUCTS_PATH, "sort=color,desc")
+    getResultActions(mockMvc, PRODUCTS_PATH, "sort=color,desc")
         .andExpect(jsonPath("$", Matchers.hasSize(20)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[0].color",
             Matchers.equalTo("Color " + (INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY - 1))))
@@ -142,7 +145,7 @@ public class ProductControllerTest {
 
   @Test
   public void thatAscSortingByBrandWithCustomPaginationWorks() throws Exception {
-    getResultActions(mockMvc, GET_PRODUCTS_PATH, "page=1&sort=brand,asc")
+    getResultActions(mockMvc, PRODUCTS_PATH, "page=1&sort=brand,asc")
         .andExpect(jsonPath("$", Matchers.hasSize(20)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[0].brand",
             Matchers.equalTo("Brand " + 27)))
@@ -155,7 +158,7 @@ public class ProductControllerTest {
 
     String titleSearchCriteria = "Jacket 1";
 
-    getResultActions(mockMvc, GET_PRODUCTS_PATH, "title=" + titleSearchCriteria)
+    getResultActions(mockMvc, PRODUCTS_PATH, "title=" + titleSearchCriteria)
         .andExpect(jsonPath("$", Matchers.hasSize(1)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[*].title",
             Matchers.everyItem(Matchers.startsWith(titleSearchCriteria))));
@@ -166,7 +169,7 @@ public class ProductControllerTest {
 
     String descriptionSearchCriteria = "Description 1";
 
-    getResultActions(mockMvc, GET_PRODUCTS_PATH,
+    getResultActions(mockMvc, PRODUCTS_PATH,
         "description=" + descriptionSearchCriteria)
         .andExpect(jsonPath("$", Matchers.hasSize(1)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[*].description",
@@ -179,7 +182,7 @@ public class ProductControllerTest {
     String titleSearchCriteria = "Jacket 1";
     String descriptionSearchCriteria = "Description 1";
 
-    getResultActions(mockMvc, GET_PRODUCTS_PATH,
+    getResultActions(mockMvc, PRODUCTS_PATH,
         "title=" + titleSearchCriteria + "&description="
             + descriptionSearchCriteria)
         .andExpect(jsonPath("$", Matchers.hasSize(1)))
@@ -188,4 +191,26 @@ public class ProductControllerTest {
         .andExpect(MockMvcResultMatchers.jsonPath("$[*].description",
             Matchers.everyItem(Matchers.startsWith(descriptionSearchCriteria))));
   }
+
+  @Test
+  public void thatBatchCreateWorks() throws Exception {
+
+    productRepository.deleteAll();
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .post(PRODUCTS_PATH)
+        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID_UNTIL_2119)
+        .content(toJson(List.of(
+            new Product("t1", "d1", "b1", 11.1d, "c1"),
+            new Product("t2", "d2", "b2", 11.2d, "c2"),
+            new Product("t3", "d3", "b3", 11.3d, "c3"))))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated());
+
+    Assert.assertEquals(productRepository.findAll().size(), 3);
+
+    productRepository.deleteAll();
+    dbInitialized = false;
+  }
+
 }
