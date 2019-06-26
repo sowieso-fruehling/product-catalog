@@ -18,7 +18,7 @@ With either of this tokens you'll be able to make API calls
 
 Best you start with batch import of products. The script
 
-`batch-import-products.sh`
+`./scripts/batch-import-products.sh`
 
 will import 100 products for you ( or more, if you run it more times). From that point on, you have following endpoints:
 
