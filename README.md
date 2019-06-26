@@ -1,15 +1,46 @@
 # Product catalog
 
-Provides REST CRUD api to authenticated user ( user that provides valid JWT). 
+REST API enabling product manipulation
 
-Only one user can be authenticated and he's credentials are username/password
+### How to use the app
 
-In memory H2 database is used as a product repository and it is populated at the application startup with 100 product records. In case you want your db not to be initialized at startup, go to ProductServiceApplication class and make it not implementing InitializingBean interface and overriding afterPropertiesSet 
+The API is protected with JWT token. To use the api you can use long living JWT: 
 
-/catalog-api/v1/products endpoint has enabled pagination and sorting. It returns by default 20 records per page. Sorting and pagination can be customized by providing request parameters page, size and sort. 
-For example, if get request is /catalog-api/v1/products?page=1&size=5&sort=description,desc it will give us second page of 5 elements, sorted by description in descending order. Sorting can be done by and of product entity properties 
+`Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6NDcxNDkyNDAwOSwiaWF0IjoxNTYxMzI0MDA5fQ.U6arTWzxzu-Fl2AhLEloYBZ8wNdHPqUu1ffWjQp6vnSc36dOoRLLyggO7KdvNPGbnLxlKQbXbRzbCtMc5eleqA`
 
-Api is versioned using URI versioning technique
+It was not requirement, but this application can also generate tokens for you. After you start your app either by docker or locally, to get valid token just execute the script: 
+
+`./scripts/get-jwt-token.sh`
+
+In real life scenarios this is not good microservices design and this functionality of providing tokens should be responsibility of another microservice, but for simplicity I kept it here
+
+With either of this tokens you'll be able to make API calls
+
+Best you start with batch import of products. The script
+
+`batch-import-products.sh`
+
+will import 100 products for you ( or more, if you run it more times). From that point on, you have following endpoints:
+
+`GET /catalog-api/v1/products` - to get all products, default pagination is 20. This endpoint accepts different request parameters so you can search by title, description, sort, define pagination ( number of records per page, or pick specific page). Here are some examples of endpoints for this:
+
+```
+GET /catalog-api/v1/products?size=50 - get first page with 50 records 
+GET /catalog-api/v1/products?page=1&sort=brand,desc - get second page, with default 20 records and sorted by brand, descending
+GET /catalog-api/v1/products?page=1&size=5 - get second page with 5 records
+GET /catalog-api/v1/product/2 - get product with id=2
+GET /catalog-api/v1/products?description=Description 3 - get products having description property equal to "Description 3"
+GET /catalog-api/v1/products?title=Title 1&description=Description 1 - get products having title=Jacket 1 and description=Description 1
+
+POST /catalog-api/v1/products - to batch create products. It's what /script/batch-import-products.sh does
+POST /catalog-api/v1/product - to create one product
+
+PUT /catalog-api/v1/product/1 - to override a product with id=1, or if there is no product with this id, to create a new one with first available id
+
+PATCH /catalog-api/v1/product/1 - to partially update product with id=1
+
+DELETE /catalog-api/v1/product/1 - to delete product with id=1
+```
 
 ### How to run the service locally
 
@@ -19,21 +50,13 @@ To start the app run:
 
 `./gradlew bootRun`
 
-To get a jwt token execute:
+### Run as docker container
 
-`./scripts/get-jwt-token.sh`
+You can get already built docker image from dockerhub by executing:
 
-Get the value of jwttoken property from the response body, it will look something like: 
+`docker pull milospajic/catalog-service:gfg`
 
-`Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6NDcxNDkyMDgzOSwiaWF0IjoxNTYxMzIwODM5fQ.PqAPFDpg6UrKReqBiBbusnVxKYYpfrfg5Vlgi9zvbV1BsOmEUqmTvH2VYuLTSbHalDFJme1VSD7gngCCGVqABg`
-
-and provide it as a parameter for the get-product.sh script. So your call will look like :
-
-`./scripts/get-products.sh "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6NDcxNDkyMDgzOSwiaWF0IjoxNTYxMzIwODM5fQ.PqAPFDpg6UrKReqBiBbusnVxKYYpfrfg5Vlgi9zvbV1BsOmEUqmTvH2VYuLTSbHalDFJme1VSD7gngCCGVqABg"`
-
-###Dockerize the app
-
-Open terminal and go to project's home directory. To create docker image run:
+If you want to build it yourself, then please open terminal and go to project's home directory. To create docker image run:
 
 `./scripts/create-docker-image.sh`
 
@@ -41,14 +64,12 @@ to run this image, execute:
 
 `./scripts/run-docker-image.sh`
 
-If you're having slower machine, before you continue, be sure that you see a message like: `"INFO 1 --- [           main] d.b.a.c.ProductServiceApplication        : Started ProductServiceApplication in xxx seconds"`
-
-Now you can use the same scripts (get-jwt-token, get-products) as in `How to run the service locally`, to access your containerized app
+If you're having slower machine, it can take a while for the container to start, also image creation can timeout, in which case you should execute the script again, or download the one from dockerhub
 
 To stop your container, you can do ctrl+c
 
 ### How to run the tests locally
 
-In terminal, in project's home directory exacute: 
+In terminal, in project's home directory execute: 
 `./gradlew test`
 

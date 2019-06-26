@@ -7,16 +7,13 @@ import static de.br.aff.catalogservice.testutils.Constants.PRODUCTS_PATH;
 import static de.br.aff.catalogservice.testutils.Constants.STARTING_PRICE_OFFSET;
 import static de.br.aff.catalogservice.testutils.Constants.TOKEN_VALID_UNTIL_2119;
 import static de.br.aff.catalogservice.testutils.TestUtils.getResultActions;
-import static de.br.aff.catalogservice.testutils.TestUtils.toJson;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.br.aff.catalogservice.domain.Product;
 import de.br.aff.catalogservice.repository.ProductRepository;
-import java.util.List;
 import java.util.stream.IntStream;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,9 +30,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ProductControllerTest {
+public class ProductControllerTestWithPreInitializedRepository {
 
-  private static boolean dbInitialized = false;
+  private static boolean initializeDb = true;
 
   @Autowired
   private MockMvc mockMvc;
@@ -44,7 +41,8 @@ public class ProductControllerTest {
 
   @Before
   public void initDb() {
-    if (!dbInitialized) {
+    if (initializeDb) {
+      productRepository.deleteAll();
       IntStream.range(0, INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY).forEach(i ->
           productRepository.save(
               new Product(DETAULT_PRODUCT_TITLE + " " + i,
@@ -53,7 +51,7 @@ public class ProductControllerTest {
                   "Color " + i))
       );
 
-      dbInitialized = true;
+      initializeDb = false;
 
     }
   }
@@ -98,18 +96,18 @@ public class ProductControllerTest {
         .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID_UNTIL_2119)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", Matchers.hasSize(DEFAULT_PAGINATION_SIZE)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[*].title",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(DEFAULT_PAGINATION_SIZE)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].title",
             Matchers.everyItem(Matchers.startsWith(DETAULT_PRODUCT_TITLE))));
   }
 
   @Test
   public void thatCustomPaginationWorks() throws Exception {
     getResultActions(mockMvc, PRODUCTS_PATH, "page=1")
-        .andExpect(jsonPath("$", Matchers.hasSize(20)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[0].brand",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(20)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].brand",
             Matchers.equalTo("Brand " + 20)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[19].brand",
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[19].brand",
             Matchers.equalTo("Brand " + 39)));
   }
 
@@ -118,17 +116,17 @@ public class ProductControllerTest {
     int numberOfRecordsOnPage = 5;
 
     getResultActions(mockMvc, PRODUCTS_PATH, "size=" + numberOfRecordsOnPage)
-        .andExpect(jsonPath("$", Matchers.hasSize(numberOfRecordsOnPage)));
+        .andExpect(jsonPath("$.content", Matchers.hasSize(numberOfRecordsOnPage)));
   }
 
   @Test
   public void thatDescSortingByPriceWorks() throws Exception {
     getResultActions(mockMvc, PRODUCTS_PATH, "sort=price,desc")
-        .andExpect(jsonPath("$", Matchers.hasSize(20)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[0].price",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(20)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].price",
             Matchers
                 .equalTo(STARTING_PRICE_OFFSET + INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY - 1)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[19].price",
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[19].price",
             Matchers
                 .equalTo(STARTING_PRICE_OFFSET + INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY - 20)));
   }
@@ -136,20 +134,20 @@ public class ProductControllerTest {
   @Test
   public void thatDescSortingByColorWorks() throws Exception {
     getResultActions(mockMvc, PRODUCTS_PATH, "sort=color,desc")
-        .andExpect(jsonPath("$", Matchers.hasSize(20)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[0].color",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(20)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].color",
             Matchers.equalTo("Color " + (INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY - 1))))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[19].color",
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[19].color",
             Matchers.equalTo("Color " + (INITIAL_NUMBER_OF_PRODUCTS_IN_REPOSITIORY - 19))));
   }
 
   @Test
   public void thatAscSortingByBrandWithCustomPaginationWorks() throws Exception {
     getResultActions(mockMvc, PRODUCTS_PATH, "page=1&sort=brand,asc")
-        .andExpect(jsonPath("$", Matchers.hasSize(20)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[0].brand",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(20)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].brand",
             Matchers.equalTo("Brand " + 27)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[19].brand",
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[19].brand",
             Matchers.equalTo("Brand " + 44)));
   }
 
@@ -159,7 +157,7 @@ public class ProductControllerTest {
     String titleSearchCriteria = "Jacket 1";
 
     getResultActions(mockMvc, PRODUCTS_PATH, "title=" + titleSearchCriteria)
-        .andExpect(jsonPath("$", Matchers.hasSize(1)))
+        .andExpect(jsonPath("$.content", Matchers.hasSize(1)))
         .andExpect(MockMvcResultMatchers.jsonPath("$[*].title",
             Matchers.everyItem(Matchers.startsWith(titleSearchCriteria))));
   }
@@ -171,8 +169,8 @@ public class ProductControllerTest {
 
     getResultActions(mockMvc, PRODUCTS_PATH,
         "description=" + descriptionSearchCriteria)
-        .andExpect(jsonPath("$", Matchers.hasSize(1)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[*].description",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(1)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].description",
             Matchers.everyItem(Matchers.startsWith(descriptionSearchCriteria))));
   }
 
@@ -185,32 +183,19 @@ public class ProductControllerTest {
     getResultActions(mockMvc, PRODUCTS_PATH,
         "title=" + titleSearchCriteria + "&description="
             + descriptionSearchCriteria)
-        .andExpect(jsonPath("$", Matchers.hasSize(1)))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[*].title",
+        .andExpect(jsonPath("$.content", Matchers.hasSize(1)))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].title",
             Matchers.everyItem(Matchers.startsWith(titleSearchCriteria))))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[*].description",
+        .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].description",
             Matchers.everyItem(Matchers.startsWith(descriptionSearchCriteria))));
   }
 
   @Test
-  public void thatBatchCreateWorks() throws Exception {
+  public void thatFetchingProductByIdWorks() throws Exception {
+    Product existingProduct = productRepository.findAll().get(0);
 
-    productRepository.deleteAll();
-
-    mockMvc.perform(MockMvcRequestBuilders
-        .post(PRODUCTS_PATH)
-        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID_UNTIL_2119)
-        .content(toJson(List.of(
-            new Product("t1", "d1", "b1", 11.1d, "c1"),
-            new Product("t2", "d2", "b2", 11.2d, "c2"),
-            new Product("t3", "d3", "b3", 11.3d, "c3"))))
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated());
-
-    Assert.assertEquals(productRepository.findAll().size(), 3);
-
-    productRepository.deleteAll();
-    dbInitialized = false;
+    getResultActions(mockMvc, "/catalog-api/v1/product/" + existingProduct.getId(), null)
+        .andExpect(MockMvcResultMatchers.jsonPath("$.title",
+            Matchers.equalTo(existingProduct.getTitle())));
   }
-
 }

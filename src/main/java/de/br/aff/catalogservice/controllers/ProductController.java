@@ -11,6 +11,7 @@ import de.br.aff.catalogservice.services.ProductService;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -25,33 +26,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/catalog-api")
+@RequestMapping("/catalog-api/v1")
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
 
   private final ProductService productService;
 
-  @GetMapping("/v1/products")
-  public List<Product> getProducts(@RequestParam(required = false) String title,
+  @GetMapping("/products")
+  public Page<Product> getProducts(@RequestParam(required = false) String title,
       @RequestParam(required = false) String description, Pageable pageable) {
     return productService.getProducts(title, description, pageable);
   }
 
-  @PostMapping("/v1/product")
+  @PostMapping("/product")
   public ResponseEntity createProduct(@RequestBody Product product) {
     Product createdProduct = productService.createProduct(product);
     return ResponseEntity.status(CREATED)
         .header(HttpHeaders.LOCATION, getResourceLocation(createdProduct)).build();
   }
 
-  @PostMapping("/v1/products")
+  @PostMapping("/products")
   public ResponseEntity createProducts(@RequestBody List<Product> products) {
     List<Product> createdProducts = productService.createProducts(products);
     return ResponseEntity.status(CREATED).body(createdProducts);
   }
 
-  @PutMapping("/v1/product/{id}")
+  @PutMapping("/product/{id}")
   public ResponseEntity overwriteOrCreateProduct(@PathVariable Long id,
       @RequestBody Product productSent) {
     Optional<Product> productFetched = productService.getProductById(id);
@@ -62,17 +63,16 @@ public class ProductController {
 
     Product existingProduct = productFetched.get();
 
-    if (existingProduct.equals(productSent)) {
-      return ResponseEntity.status(NO_CONTENT).build();
+    if (!existingProduct.equals(productSent)) {
+      productSent.setId(existingProduct.getId());
+      productService.updateProduct(productSent);
     }
 
-    productSent.setId(existingProduct.getId());
-    Product updatedProduct = productService.updateProduct(productSent);
-    return ResponseEntity.status(OK).body(updatedProduct);
+    return ResponseEntity.status(NO_CONTENT).build();
   }
 
-  @PatchMapping("/v1/product/{id}")
-  public ResponseEntity updateProduct(@PathVariable Long id,
+  @PatchMapping("/product/{id}")
+  public ResponseEntity partiallyUpdateProduct(@PathVariable Long id,
       @RequestBody Product newValues) {
     Optional<Product> productFetched = productService.getProductById(id);
 
@@ -92,8 +92,8 @@ public class ProductController {
     return ResponseEntity.status(NO_CONTENT).build();
   }
 
-  @DeleteMapping("/v1/product/{id}")
-  public ResponseEntity updateProduct(@PathVariable Long id) {
+  @DeleteMapping("/product/{id}")
+  public ResponseEntity deleteProduct(@PathVariable Long id) {
     Optional<Product> productFetched = productService.getProductById(id);
 
     if (!productFetched.isPresent()) {
@@ -105,7 +105,7 @@ public class ProductController {
     return ResponseEntity.status(NO_CONTENT).build();
   }
 
-  @GetMapping("/v1/product/{id}")
+  @GetMapping("/product/{id}")
   public ResponseEntity getProduct(@PathVariable Long id) {
     Optional<Product> productFetched = productService.getProductById(id);
 

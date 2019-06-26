@@ -5,8 +5,8 @@ import de.br.aff.catalogservice.repository.ProductRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +15,7 @@ public class ProductService {
 
   private final ProductRepository productRepository;
 
-  public List<Product> getProducts(String title, String description, Pageable pageable) {
+  public Page<Product> getProducts(String title, String description, Pageable pageable) {
 
     if (title != null && description != null) {
       return productRepository.findByTitleAndDescription(title, description, pageable);
@@ -29,11 +29,11 @@ public class ProductService {
       return productRepository.findByDescription(description, pageable);
     }
 
-    Slice<Product> productPage = productRepository.findAll(pageable);
-    return productPage.getContent();
+    return productRepository.findAll(pageable);
   }
 
   public Product createProduct(Product product) {
+    product.setId(null);
     return productRepository.save(product);
   }
 
@@ -50,6 +50,7 @@ public class ProductService {
   }
 
   public void patchProductObject(Product productToPatch, Product newValues) {
+
     if (newValues.getTitle() != null) {
       productToPatch.setTitle(newValues.getTitle());
     }
