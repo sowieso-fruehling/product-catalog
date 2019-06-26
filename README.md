@@ -60,13 +60,11 @@ If you want to build it yourself, then please open terminal and go to project's 
 
 `./scripts/create-docker-image.sh`
 
-to run this image, execute:
+to run the image you've built yourself, please execute:
 
 `./scripts/run-docker-image.sh`
 
 If you're having slower machine, it can take a while for the container to start, also image creation can timeout, in which case you should execute the script again, or download the one from dockerhub
-
-To stop your container, you can do ctrl+c
 
 ### How to run the tests locally
 
