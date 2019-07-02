@@ -5,7 +5,7 @@ import static de.br.aff.catalogservice.testutils.TestUtils.toJson;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import de.br.aff.catalogservice.security.UserAuthCredentials;
+import de.br.aff.security.UserAuthCredentials;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;

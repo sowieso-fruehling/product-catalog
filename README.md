@@ -8,11 +8,11 @@ The API is protected with JWT token. To use the api you can use long living JWT:
 
 `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6NDcxNDkyNDAwOSwiaWF0IjoxNTYxMzI0MDA5fQ.U6arTWzxzu-Fl2AhLEloYBZ8wNdHPqUu1ffWjQp6vnSc36dOoRLLyggO7KdvNPGbnLxlKQbXbRzbCtMc5eleqA`
 
-It was not requirement, but this application can also generate tokens for you. After you start your app either by docker or locally, to get valid token just execute the script: 
+This application can also generate tokens for you. After you start your app either by docker or locally, to get valid token just execute the script: 
 
 `./scripts/get-jwt-token.sh`
 
-In real life scenarios this is not good microservices design and this functionality of providing tokens should be responsibility of another microservice, but for simplicity I kept it here
+In real life scenarios this is not good microservices design and this functionality of providing tokens should be responsibility of another microservice, but for simplicity it's kept here
 
 With either of this tokens you'll be able to make API calls
 

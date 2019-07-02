@@ -1,4 +1,4 @@
-package de.br.aff.catalogservice;
+package de.br.aff;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;

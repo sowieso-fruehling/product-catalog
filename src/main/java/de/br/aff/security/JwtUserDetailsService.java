@@ -1,4 +1,4 @@
-package de.br.aff.catalogservice.security;
+package de.br.aff.security;
 
 import java.util.ArrayList;
 import org.springframework.security.core.userdetails.User;

@@ -1,4 +1,4 @@
-package de.br.aff.catalogservice.security;
+package de.br.aff.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

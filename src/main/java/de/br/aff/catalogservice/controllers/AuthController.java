@@ -1,9 +1,9 @@
 package de.br.aff.catalogservice.controllers;
 
-import de.br.aff.catalogservice.security.JwtResponse;
-import de.br.aff.catalogservice.security.JwtTokenUtil;
-import de.br.aff.catalogservice.security.JwtUserDetailsService;
-import de.br.aff.catalogservice.security.UserAuthCredentials;
+import de.br.aff.security.JwtResponse;
+import de.br.aff.security.JwtTokenUtil;
+import de.br.aff.security.JwtUserDetailsService;
+import de.br.aff.security.UserAuthCredentials;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

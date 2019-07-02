@@ -1,4 +1,4 @@
-package de.br.aff.catalogservice.security;
+package de.br.aff.security;
 
 import lombok.Getter;
 

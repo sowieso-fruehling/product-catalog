@@ -1,4 +1,4 @@
-package de.br.aff.catalogservice.security;
+package de.br.aff.security;
 
 
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity httpSecurity) throws Exception {
 
     httpSecurity.cors().and().csrf().disable()
-        .authorizeRequests().antMatchers("/authenticate").permitAll()
+        .authorizeRequests().antMatchers("/authenticate"
+//        , "/h2-console/**"
+        ).permitAll()
         .anyRequest().authenticated()
         .and()
         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
@@ -55,6 +57,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .accessDeniedHandler(restAccesDeniedHandler)
         .authenticationEntryPoint(authenticationFailureHandler)
         .and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//        .and().headers().frameOptions().disable() // because h2 is running in the frames
+        ;
   }
 }
