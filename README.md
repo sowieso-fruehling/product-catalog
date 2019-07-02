@@ -42,6 +42,10 @@ PATCH /catalog-api/v1/product/1 - to partially update product with id=1
 DELETE /catalog-api/v1/product/1 - to delete product with id=1
 ```
 
+If you're using Postman, here are a couple of requests available, that you can import and use:
+
+https://www.getpostman.com/collections/dbe09c76e00f1adab7dd
+
 ### How to run the service locally
 
 Open terminal and go to project's home directory
